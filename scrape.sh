@@ -1,6 +1,5 @@
 !#/bin/bash
 
-cd /users/saharri2/Desktop/WV-School-Closings
 source venv/bin/activate
 
 echo "------------------------------" >> scraper.log
