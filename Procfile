@@ -1,1 +1,1 @@
-web: gunicorn schoolclosings.wsgi --log-file -
+web: python manage.py collectstatic --noinput && gunicorn schoolclosings.wsgi --bind 0.0.0.0:$PORT --log-file -
