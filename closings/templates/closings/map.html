@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WV School Closings Map</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #1e3a8a 0%, #312e81 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: white;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            color: #cbd5e1;
+            font-size: 1.1rem;
+        }
+
+        .legend {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .legend-color {
+            width: 24px;
+            height: 24px;
+            border-radius: 4px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .map-container {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+            padding: 40px;
+            margin-bottom: 20px;
+        }
+
+        #wv-map {
+            width: 100%;
+            height: auto;
+            max-width: 1000px;
+            margin: 0 auto;
+            display: block;
+        }
+
+        #wv-map path {
+            stroke: #374151;
+            stroke-width: 2;
+            cursor: pointer;
+            transition: opacity 0.2s, stroke-width 0.2s;
+        }
+
+        #wv-map path:hover {
+            opacity: 0.8;
+            stroke-width: 3;
+            stroke: white;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: #1e293b;
+            padding: 30px;
+            border-radius: 10px;
+            max-width: 500px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .modal-title {
+            font-size: 1.8rem;
+            font-weight: bold;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 2rem;
+            cursor: pointer;
+            padding: 0;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .close-btn:hover {
+            opacity: 0.7;
+        }
+
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 6px;
+            margin-bottom: 10px;
+        }
+
+        .detail-label {
+            font-weight: 600;
+        }
+
+        .last-updated {
+            text-align: center;
+            margin-top: 20px;
+            color: #cbd5e1;
+            font-size: 0.9rem;
+        }
+
+        .refresh-info {
+            text-align: center;
+            margin-top: 10px;
+            padding: 15px;
+            background: rgba(59, 130, 246, 0.2);
+            border-radius: 8px;
+            color: #93c5fd;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🏫 WV School Closings & Delays</h1>
+            <p class="subtitle">Live updates from WVEIS - <span id="current-date"></span></p>
+        </header>
+
+        <div class="legend">
+            <div class="legend-item">
+                <div class="legend-color" style="background: #ef4444;"></div>
+                <span>Closed</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background: #fbbf24;"></div>
+                <span>Delayed</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background: #3b82f6;"></div>
+                <span>Non-Traditional</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background: #10b981;"></div>
+                <span>Dismissed</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background: #9ca3af;"></div>
+                <span>Normal / No Data</span>
+            </div>
+        </div>
+
+        <div class="map-container">
+            <!-- Your SVG map goes here - paste the entire SVG -->
+            {{ svg_content|safe }}
+        </div>
+
+        <div class="refresh-info">
+            💡 Data is pulled directly from WVEIS.
+        </div>
+
+        <div class="last-updated">
+            Data sourced from WVEIS • Click any county for details
+            <br><br>
+            Unofficial tool - Official WVEIS site: <a href="https://wveis.k12.wv.us/closings/" target="_blank" style="color: #93c5d; text-decoration: underline;">wveis.k12.wv.us/closings</a>
+        </div>
+    </div>
+
+    <!-- Modal for county details -->
+    <div class="modal" id="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title" id="modal-title">County Name</h2>
+                <button class="close-btn" onclick="closeModal()">&times;</button>
+            </div>
+            <div id="modal-body"></div>
+        </div>
+    </div>
+
+    <script>
+        // County data from Django
+        const countiesData = {{ counties_json|safe }};
+
+        // Display current date
+        const dateOptions = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+        document.getElementById('current-date').textContent = 
+            new Date().toLocaleDateString('en-US', dateOptions);
+
+        // Color the counties on the map
+        function colorCounties() {
+            for (const [countyName, data] of Object.entries(countiesData)) {
+                // Find the path element for this county
+                const pathElement = document.getElementById(countyName);
+                if (pathElement) {
+                    pathElement.style.fill = data.color;
+                    
+                    // Add click event
+                    pathElement.onclick = () => openModal(data);
+                }
+            }
+        }
+
+        // Open modal with county details
+        function openModal(county) {
+            const modal = document.getElementById('modal');
+            const title = document.getElementById('modal-title');
+            const body = document.getElementById('modal-body');
+
+            title.textContent = county.name + ' County';
+            
+            body.innerHTML = `
+                <div class="detail-row">
+                    <span class="detail-label">Status:</span>
+                    <span style="color: ${county.color}; font-weight: bold;">${county.status}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Closings:</span>
+                    <span>${county.closings}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Delays:</span>
+                    <span>${county.delays}${county.delay_duration ? ' (' + county.delay_duration + ')' : ''}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Dismissals:</span>
+                    <span>${county.dismissals}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Non-Traditional:</span>
+                    <span>${county.non_traditional}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Bus Info:</span>
+                    <span>${county.bus_info}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Last Updated:</span>
+                    <span>${county.last_update}</span>
+                </div>
+            `;
+
+            modal.classList.add('active');
+        }
+
+        // Close modal
+        function closeModal() {
+            document.getElementById('modal').classList.remove('active');
+        }
+
+        // Close modal when clicking outside
+        document.getElementById('modal').onclick = function(e) {
+            if (e.target === this) {
+                closeModal();
+            }
+        };
+
+        // Color the map on load
+        colorCounties();
+    </script>
+</body>
+</html>

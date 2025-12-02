@@ -1,0 +1,132 @@
+import requests
+from bs4 import BeautifulSoup
+import feedparser
+import re
+from .models import County
+
+def parse_rss_feed():
+    """
+    Parse the RSS feed and extract delay durations and other details.
+    Returns a dictionary with county names as keys.
+    """
+    rss_data = {}
+    
+    try:
+        feed = feedparser.parse('https://wveis.k12.wv.us/closings/rss.php')
+        
+        for entry in feed.entries:
+            # Extract county name from title: "All schools in Hampshire County"
+            title = entry.title
+            county_match = re.search(r'All schools in (.+?) County', title)
+            
+            if county_match:
+                county_name = county_match.group(1)
+                description = entry.description
+                
+                # Make sure description is a string (fix Pylance warning)
+                if not isinstance(description, str):
+                    continue
+                
+                # Extract delay duration (2-hour, 3-hour, etc.)
+                delay_match = re.search(r'(\d+)-hour delay', description, re.IGNORECASE)
+                delay_duration = delay_match.group(0) if delay_match else ""
+                
+                # Extract the reason if present
+                reason_match = re.search(r'due to (.+?)\.', description)
+                reason = reason_match.group(1) if reason_match else ""
+                
+                rss_data[county_name] = {
+                    'delay_duration': delay_duration,
+                    'reason': reason,
+                    'full_description': description
+                }
+                
+                print(f"RSS: {county_name} - {delay_duration if delay_duration else 'No delay info'}")
+        
+        return rss_data
+    
+    except Exception as e:
+        print(f"Error parsing RSS feed: {e}")
+        return {}
+
+def scrape_wveis():
+    """
+    Scrapes the WVEIS school closings page and updates the database.
+    Also pulls delay duration info from RSS feed.
+    Returns a tuple of (success_count, error_message)
+    """
+    url = "https://wveis.k12.wv.us/closings/"
+    
+    try:
+        # First, get RSS feed data
+        print("Parsing RSS feed for delay durations...")
+        rss_data = parse_rss_feed()
+        
+        # Then scrape the main page
+        headers = {
+            'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36'
+        }
+        print(f"Fetching data from {url}...")
+        response = requests.get(url, headers=headers, timeout=10)
+        response.raise_for_status()
+        
+        soup = BeautifulSoup(response.content, 'html.parser')
+        table = soup.find('table', class_='closings-table')
+        
+        if not table:
+            return (0, "Could not find the closings table on the page")
+        
+        rows = table.find_all('tr')[1:]  # Skip header
+        updated_count = 0
+        
+        for row in rows:
+            cells = row.find_all('td')
+            
+            if len(cells) < 7:
+                continue
+            
+            county_link = cells[0].find('a')
+            if not county_link:
+                continue
+            
+            county_name = county_link.get_text(strip=True)
+            closings = cells[1].get_text(strip=True)
+            delays = cells[2].get_text(strip=True)
+            dismissals = cells[3].get_text(strip=True)
+            non_traditional = cells[4].get_text(strip=True)
+            bus_info = cells[5].get_text(strip=True)
+            last_update = cells[6].get_text(strip=True)
+            
+            if not county_name:
+                continue
+            
+            # Get delay duration from RSS if available
+            delay_duration = ""
+            if county_name in rss_data and delays != "None":
+                delay_duration = rss_data[county_name].get('delay_duration', '')
+            
+            # Update or create the county in database
+            county, created = County.objects.update_or_create(
+                name=county_name,
+                defaults={
+                    'closings': closings,
+                    'delays': delays,
+                    'dismissals': dismissals,
+                    'non_traditional': non_traditional,
+                    'bus_info': bus_info,
+                    'last_update': last_update,
+                    'delay_duration': delay_duration,
+                }
+            )
+            
+            action = "Created" if created else "Updated"
+            duration_info = f" ({delay_duration})" if delay_duration else ""
+            print(f"{action}: {county_name} - {county.get_status()}{duration_info}")
+            updated_count += 1
+        
+        return (updated_count, None)
+    
+    except requests.RequestException as e:
+        return (0, f"Network error: {str(e)}")
+    except Exception as e:
+        return (0, f"Error: {str(e)}")
