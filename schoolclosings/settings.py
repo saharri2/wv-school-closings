@@ -19,7 +19,7 @@ ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'wv-school-closings.com', 'www.wv-sch
 # Add Railway domains in production
 if 'RAILWAY_ENVIRONMENT' in os.environ:
     DEBUG = False
-    ALLOWED_HOSTS = ['.railway.app', '.up.railway.app']
+    ALLOWED_HOSTS = ['.railway.app', '.up.railway.app', 'yvj5hoai.up.railway.app']
     SECRET_KEY = os.environ.get('SECRET_KEY', SECRET_KEY)
 
 # Application definition
