@@ -112,7 +112,7 @@ STATIC_URL = 'static/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # Security settings for production
-if not DEBUG:
+if not DEBUG and 'RAILWAY_ENVIRONMENT' not in os.environ:
     SECURE_SSL_REDIRECT = True
     SESSION_COOKIE_SECURE = True
     CSRF_COOKIE_SECURE = True
