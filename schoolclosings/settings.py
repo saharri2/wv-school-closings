@@ -14,8 +14,13 @@ SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-dev-key-for-local-onl
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
-ALLOWED_HOSTS = ['domain.com', 'www.domain.com']
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'wv-school-closings.com', 'www.wv-school-closings.com']
 
+# Add Railway domains in production
+if 'RAILWAY_ENVIRONMENT' in os.environ:
+    DEBUG = False
+    ALLOWED_HOSTS = ['.railway.app', '.up.railway.app']
+    SECRET_KEY = os.environ.get('SECRET_KEY', SECRET_KEY)
 
 # Application definition
 
@@ -119,8 +124,3 @@ if not DEBUG and 'RAILWAY_ENVIRONMENT' not in os.environ:
     SECURE_BROWSER_XSS_FILTER = True
     SECURE_CONTENT_TYPE_NOSNIFF = True
     X_FRAME_OPTIONS = 'DENY'
-
-if 'RAILWAY_ENVIRONMENT' in os.environ:
-    DEBUG = False
-    ALLOWED_HOSTS = ['.railway.app', '.up.railway.app']
-    SECRET_KEY = os.environ.get('SECRET_KEY', SECRET_KEY)
