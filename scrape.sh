@@ -1,7 +1,5 @@
 #!/bin/bash
 
-source venv/bin/activate
-
 echo "------------------------------" >> scraper.log
 echo "Scrape started at $(date)" >> scraper.log
 
