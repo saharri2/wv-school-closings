@@ -208,21 +208,17 @@
             </div>
         </div>
 
+        <div style="text-align: center; color: #cbd5e1; margin-bottom: 20px; font-size: 0.95rem;">
+            ⓘ Click any county for details
+        </div>
+
         <div class="map-container">
-            <!-- Your SVG map goes here - paste the entire SVG -->
             {{ svg_content|safe }}
         </div>
 
         <div class="refresh-info">
-            💡 Data is pulled directly from WVEIS.
-        </div>
-
-        <div class="last-updated">
-            Data sourced from WVEIS • Click any county for details
-            <br><br>
             Unofficial tool - Official WVEIS site: <a href="https://wveis.k12.wv.us/closings/" target="_blank" style="color: #93c5d; text-decoration: underline;">wveis.k12.wv.us/closings</a>
         </div>
-    </div>
 
     <!-- Modal for county details -->
     <div class="modal" id="modal">
