@@ -75,7 +75,18 @@ def scrape_wveis():
         ]
 
         for county_name in all_counties:
-            County.objects.get_or_create(name=county_name)
+            County.objects.get_or_create(
+                name=county_name,
+                defaults={
+                    'closings': 'None',
+                    'delays': 'None',
+                    'dismissals': 'None',
+                    'non_traditional': 'None',
+                    'bus_info': 'None',
+                    'delay_duration': '',
+                    'last_update': '',
+                }
+            )
 
         # Reset all counties to "None" status before updating
         print("Resetting all counties to default status...")
