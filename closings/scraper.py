@@ -61,6 +61,17 @@ def scrape_wveis():
         # First, get RSS feed data
         print("Parsing RSS feed for delay durations...")
         rss_data = parse_rss_feed()
+
+        # Reset all counties to "None" status before updating
+        print("Resetting all counties to default status...")
+        County.objects.all().update(
+            closings='None',
+            delays='None',
+            dismissals='None',
+            non_traditional='None',
+            bus_info='None',
+            delay_duration='',
+        )
         
         # Then scrape the main page
         headers = {
