@@ -62,6 +62,21 @@ def scrape_wveis():
         print("Parsing RSS feed for delay durations...")
         rss_data = parse_rss_feed()
 
+        # Ensure all 55 counties exist in database
+        all_counties = [
+            'Barbour', 'Berkeley', 'Boone', 'Braxton', 'Brooke', 'Cabell', 'Calhoun',
+            'Clay', 'Doddridge', 'Fayette', 'Gilmer', 'Grant', 'Greenbrier', 'Hampshire',
+            'Hancock', 'Hardy', 'Harrison', 'Jackson', 'Jefferson', 'Kanawha', 'Lewis',
+            'Lincoln', 'Logan', 'Marion', 'Marshall', 'Mason', 'McDowell', 'Mercer',
+            'Mineral', 'Mingo', 'Monongalia', 'Monroe', 'Morgan', 'Nicholas', 'Ohio',
+            'Pendleton', 'Pleasants', 'Pocahontas', 'Preston', 'Putnam', 'Raleigh',
+            'Randolph', 'Ritchie', 'Roane', 'Summers', 'Taylor', 'Tucker', 'Tyler',
+            'Upshur', 'Wayne', 'Webster', 'Wetzel', 'Wirt', 'Wood', 'Wyoming'
+        ]
+
+        for county_name in all_counties:
+            County.objects.get_or_create(name=county_name)
+
         # Reset all counties to "None" status before updating
         print("Resetting all counties to default status...")
         County.objects.all().update(
