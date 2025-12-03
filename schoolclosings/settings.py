@@ -64,7 +64,7 @@ WSGI_APPLICATION = 'schoolclosings.wsgi.application'
 
 DATABASES = {
     'default': dj_database_url.config(
-        default='postgresql://wv_closings_db_user:vEpuek4fi4sXp6ejE9Hw1J6SzKsGvZCV@dpg-d4nnjha4d50c739o9ek0-a.ohio-postgres.render.com/wv_closings_db',
+        default='DATABASE_EXTERNAL_URL',
         conn_max_age=600
     )
 }
