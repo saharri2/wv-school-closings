@@ -14,6 +14,7 @@ class County(models.Model):
     non_traditional = models.CharField(max_length=100, default=None)
     bus_info = models.CharField(max_length=100, default=None)
     delay_duration = models.CharField(max_length=100, blank=True, default="")
+    specific_school_closings = models.TextField(blank=True, default='')
 
     # Last update of the data
     last_update = models.CharField(max_length=100, blank=True)
@@ -31,7 +32,10 @@ class County(models.Model):
 
     def get_status(self):
         """Returns primary status of the county"""
-        if self.closings != "None":
+        
+        if self.closings == "Some":
+            return "PARTIAL"
+        elif self.closings != "None":
             return "CLOSED"
         elif self.delays != "None":
             return "DELAYED"
@@ -48,6 +52,7 @@ class County(models.Model):
         status = self.get_status()
         colors = {
             "CLOSED": "#ef4444", # red
+            "PARTIAL": "#f97316", # orange
             "DELAYED": "#fbbf24", # yellow
             "NON-TRADITIONAL": "#3b82f6", # blue
             "DISMISSED": "#10b981", # green

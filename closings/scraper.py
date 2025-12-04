@@ -3,6 +3,7 @@ from bs4 import BeautifulSoup
 import feedparser
 import re
 from .models import County
+import json
 
 def parse_rss_feed():
     """
@@ -17,31 +18,58 @@ def parse_rss_feed():
         for entry in feed.entries:
             # Extract county name from title: "All schools in Hampshire County"
             title = entry.title
-            county_match = re.search(r'All schools in (.+?) County', title)
+            description = entry.description
+            if not isinstance(description, str):
+                continue
+
+            if 'All schools' in title:
+                county_match = re.search(r'All schools in (.+?) County', title)
             
-            if county_match:
-                county_name = county_match.group(1)
-                description = entry.description
-                
-                # Make sure description is a string (fix Pylance warning)
-                if not isinstance(description, str):
-                    continue
-                
-                # Extract delay duration (2-hour, 3-hour, etc.)
-                delay_match = re.search(r'(\d+)-hour delay', description, re.IGNORECASE)
-                delay_duration = delay_match.group(0) if delay_match else ""
-                
-                # Extract the reason if present
-                reason_match = re.search(r'due to (.+?)\.', description)
-                reason = reason_match.group(1) if reason_match else ""
-                
-                rss_data[county_name] = {
-                    'delay_duration': delay_duration,
-                    'reason': reason,
-                    'full_description': description
-                }
-                
-                print(f"RSS: {county_name} - {delay_duration if delay_duration else 'No delay info'}")
+                if county_match:
+                    county_name = county_match.group(1)
+                    description = entry.description
+                    
+                    # Make sure description is a string (fix Pylance warning)
+                    if not isinstance(description, str):
+                        continue
+                    
+                    # Extract delay duration (2-hour, 3-hour, etc.)
+                    delay_match = re.search(r'(\d+)-hour delay', description, re.IGNORECASE)
+                    delay_duration = delay_match.group(0) if delay_match else ""
+                    
+                    # Extract the reason if present
+                    reason_match = re.search(r'due to (.+?)\.', description)
+                    reason = reason_match.group(1) if reason_match else ""
+                    
+                    rss_data[county_name] = {
+                        'delay_duration': delay_duration,
+                        'reason': reason,
+                        'full_description': description
+                    }
+                    
+                    print(f"RSS: {county_name} - {delay_duration if delay_duration else 'No delay info'}")
+
+            else:
+                school_match = re.search(r'(.+?) in (.+?) County', title)
+
+                if school_match:
+                    school_name = school_match.group(1)
+                    county_name = school_match.group(2)
+
+                    if county_name not in rss_data:
+                        rss_data[county_name] = {
+                            'delay_duration': '',
+                            'reason': '',
+                            'full_description': '',
+                            'school_closings': []
+                        }
+                    
+                    rss_data[county_name]['school_closings'].append({
+                        'name': school_name,
+                        'description': description.strip()
+                    })
+
+                    print(f"RSS: Individual school - {school_name} in {county_name}")
         
         return rss_data
     
@@ -85,6 +113,7 @@ def scrape_wveis():
                     'bus_info': 'None',
                     'delay_duration': '',
                     'last_update': '',
+                    'specific_school_closings': '',
                 }
             )
 
@@ -97,6 +126,7 @@ def scrape_wveis():
             non_traditional='None',
             bus_info='None',
             delay_duration='',
+            specific_school_closings='',
         )
         
         # Then scrape the main page
@@ -141,7 +171,10 @@ def scrape_wveis():
             delay_duration = ""
             if county_name in rss_data and delays != "None":
                 delay_duration = rss_data[county_name].get('delay_duration', '')
-            
+
+            if rss_data[county_name].get("school_closings"):
+                school_closings_json = json.dumps(rss_data[county_name]['school_closings'])
+
             # Update or create the county in database
             county, created = County.objects.update_or_create(
                 name=county_name,
@@ -153,12 +186,14 @@ def scrape_wveis():
                     'bus_info': bus_info,
                     'last_update': last_update,
                     'delay_duration': delay_duration,
+                    'specific_school_closings': school_closings_json
                 }
             )
             
             action = "Created" if created else "Updated"
             duration_info = f" ({delay_duration})" if delay_duration else ""
-            print(f"{action}: {county_name} - {county.get_status()}{duration_info}")
+            school_info = f" - {len(json.loads(school_closings_json)) if school_closings_json else 0} individual schools" if school_closings_json else ""
+            print(f"{action}: {county_name} - {county.get_status()}{duration_info}{school_info}")
             updated_count += 1
         
         return (updated_count, None)

@@ -61,7 +61,7 @@ WSGI_APPLICATION = 'schoolclosings.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
-
+# Production DB variable
 DATABASES = {
     'default': dj_database_url.config(
         default='DATABASE_EXTERNAL_URL',
@@ -69,6 +69,13 @@ DATABASES = {
     )
 }
 
+# Testing database variable:
+# DATABASES = {
+#         'default': {
+#             'ENGINE': 'django.db.backends.sqlite3',
+#             'NAME': BASE_DIR / 'db.sqlite3',
+#         }
+#     }
 
 # Password validation
 # https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators

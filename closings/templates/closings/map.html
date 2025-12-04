@@ -161,6 +161,40 @@
             font-weight: 600;
         }
 
+        .school-closings-section {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 2px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .school-closings-title {
+            font-size: 1.3rem;
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: #f97316;
+        }
+
+        .school-item {
+            background: rgba(249, 115, 22, 0.1);
+            border-left: 3px solid #f97316;
+            padding: 12px;
+            margin-bottom: 12px;
+            border-radius: 6px;
+        }
+
+        .school-name {
+            font-weight: 600;
+            font-size: 1.05rem;
+            margin-bottom: 6px;
+            color: #fbbf24;
+        }
+
+        .school-description {
+            color: #cbd5e1;
+            font-size: 0.95rem;
+            line-height: 1.4;
+        }
+
         .last-updated {
             text-align: center;
             margin-top: 20px;
@@ -189,6 +223,10 @@
             <div class="legend-item">
                 <div class="legend-color" style="background: #ef4444;"></div>
                 <span>Closed</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background: #f97316;"></div>
+                <span>Partial Closing</span>
             </div>
             <div class="legend-item">
                 <div class="legend-color" style="background: #fbbf24;"></div>
@@ -262,7 +300,7 @@
 
             title.textContent = county.name + ' County';
             
-            body.innerHTML = `
+            let htmlContent = `
                 <div class="detail-row">
                     <span class="detail-label">Status:</span>
                     <span style="color: ${county.color}; font-weight: bold;">${county.status}</span>
@@ -293,6 +331,25 @@
                 </div>
             `;
 
+            if (county.status === 'PARTIAL' && county.school_closings && county.school_closings.length > 0) {
+                htmlContent += `
+                    <div class="school-closings-section">
+                        <h3 class="school-closings-title">Individual School Closings</h3>
+                `;
+
+                county.school_closings.forEach(school => {
+                    htmlContent += `
+                        <div class="school-item">
+                            <div class="school-name">${school.name}</div>
+                            <div class="school-description">${school.description}</div>
+                        </div>
+                    `;
+                });
+
+                htmlContent += `</div>`;
+            }
+
+            body.innerHTML = htmlContent;
             modal.classList.add('active');
         }
 

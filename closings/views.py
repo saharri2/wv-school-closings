@@ -13,6 +13,13 @@ def map_view(request):
     # Convert to a format we can use in JavaScript
     counties_data = {}
     for county in counties:
+        school_closings = []
+        if county.specific_school_closings:
+            try:
+                school_closings = json.loads(county.specific_school_closings)
+            except json.JSONDecodeError:
+                school_closings = []
+        
         counties_data[county.name] = {
             'name': county.name,
             'status': county.get_status(),
@@ -24,6 +31,7 @@ def map_view(request):
             'non_traditional': county.non_traditional,
             'bus_info': county.bus_info,
             'last_update': county.last_update,
+            'school_closings': school_closings,
         }
     
     # Read SVG file
