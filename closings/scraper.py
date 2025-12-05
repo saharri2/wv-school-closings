@@ -44,7 +44,8 @@ def parse_rss_feed():
                     rss_data[county_name] = {
                         'delay_duration': delay_duration,
                         'reason': reason,
-                        'full_description': description
+                        'full_description': description,
+                        'school_closings': []
                     }
                     
                     print(f"RSS: {county_name} - {delay_duration if delay_duration else 'No delay info'}")
@@ -63,6 +64,9 @@ def parse_rss_feed():
                             'full_description': '',
                             'school_closings': []
                         }
+
+                    if 'school_closings' not in rss_data[county_name]:
+                        rss_data[county_name]['school_closings'] = []
                     
                     rss_data[county_name]['school_closings'].append({
                         'name': school_name,
