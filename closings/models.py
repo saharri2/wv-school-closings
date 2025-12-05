@@ -38,7 +38,10 @@ class County(models.Model):
         elif self.closings != "None":
             return "CLOSED"
         elif self.delays != "None":
-            return "DELAYED"
+            if "3-hour" in self.delay_duration.lower() or "3 hour" in self.delay_duration.lower():
+                return "DELAYED-3HR"
+            else:
+                return "DELAYED"
         elif self.non_traditional != "None":
             return "NON-TRADITIONAL"
         elif self.dismissals != "None":
@@ -53,9 +56,10 @@ class County(models.Model):
         colors = {
             "CLOSED": "#ef4444", # red
             "PARTIAL": "#f97316", # orange
-            "DELAYED": "#fbbf24", # yellow
+            "DELAYED": "#fbbf24", # green
+            "DELAYED-3HR": "#4c00b0", # purple
             "NON-TRADITIONAL": "#3b82f6", # blue
-            "DISMISSED": "#10b981", # green
+            "DISMISSED": "#0fcf8f", # sea green
             "NORMAL": "#9ca3af" # gray
         }
 
