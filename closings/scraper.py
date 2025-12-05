@@ -169,6 +169,7 @@ def scrape_wveis():
             
             # Get delay duration from RSS if available
             delay_duration = ""
+            school_closings_json = ""
             if county_name in rss_data and delays != "None":
                 delay_duration = rss_data[county_name].get('delay_duration', '')
 
