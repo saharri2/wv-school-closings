@@ -15,6 +15,7 @@ class County(models.Model):
     bus_info = models.CharField(max_length=100, default=None)
     delay_duration = models.CharField(max_length=100, blank=True, default="")
     specific_school_closings = models.TextField(blank=True, default='')
+    specific_school_dismissals = models.TextField(blank=True, default ='')
 
     # Last update of the data
     last_update = models.CharField(max_length=100, blank=True)
@@ -44,6 +45,8 @@ class County(models.Model):
                 return "DELAYED"
         elif self.non_traditional != "None":
             return "NON-TRADITIONAL"
+        elif self.dismissals == "Some":
+            return "PARTIAL-DISMISSAL"
         elif self.dismissals != "None":
             return "DISMISSED"
         else:
@@ -60,6 +63,7 @@ class County(models.Model):
             "DELAYED-3HR": "#4c00b0", # purple
             "NON-TRADITIONAL": "#3b82f6", # blue
             "DISMISSED": "#0fcf8f", # sea green
+            "PARTIAL-DISMISSAL": "#0fcf8f", # sea green
             "NORMAL": "#9ca3af" # gray
         }
 

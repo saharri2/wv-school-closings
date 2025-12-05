@@ -185,12 +185,33 @@
             color: #f97316;
         }
 
+        .school-dismissals-section {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 2px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .school-dismissals-title {
+            font-size: 1.3rem;
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: #0fcf8f;
+        }
+
         .school-item {
-            background: rgba(249, 115, 22, 0.1);
-            border-left: 3px solid #f97316;
             padding: 12px;
             margin-bottom: 12px;
             border-radius: 6px;
+        }
+
+        .school-dismissal-item {
+            background: rgba(15, 207, 143, 0.1);
+            border-left: 3px solid #0fcf8f;
+        }
+
+        .school-closing-item {
+            background: rgba(249, 115, 22, 0.1);
+            border-left: 3px solid #f97316;
         }
 
         .school-name {
@@ -354,13 +375,29 @@
 
                 county.school_closings.forEach(school => {
                     htmlContent += `
-                        <div class="school-item">
+                        <div class="school-item school-closing-item">
                             <div class="school-name">${school.name}</div>
                             <div class="school-description">${school.description}</div>
                         </div>
                     `;
                 });
 
+                htmlContent += `</div>`;
+            }
+
+            if (county.status === 'PARTIAL-DISMISSAL' && county.school_dismissals && county.school_dismissals.length > 0) {
+                htmlContent += `
+                    <div class="school-dismissals-section">
+                        <h3 class="school-dismissals-title">Individual School Dismissals</h3>
+                `;
+                county.school_dismissals.forEach(school => {
+                    htmlContent += `
+                        <div class="school-item school-dismissal-item">
+                            <div class="school-name">${school.name}</div>
+                            <div class="school-description">${school.description}</div>
+                        </div>
+                    `;
+                });
                 htmlContent += `</div>`;
             }
 
