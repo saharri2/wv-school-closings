@@ -41,13 +41,19 @@ def parse_rss_feed():
                     reason_match = re.search(r'due to (.+?)\.', description)
                     reason = reason_match.group(1) if reason_match else ""
                     
-                    rss_data[county_name] = {
-                        'delay_duration': delay_duration,
-                        'reason': reason,
-                        'full_description': description,
-                        'school_closings': [],
-                        'school_dismissals': []
-                    }
+                    if county_name not in rss_data:
+                        rss_data[county_name] = {
+                            'delay_duration': delay_duration,
+                            'reason': reason,
+                            'full_description': description,
+                            'school_closings': [],
+                            'school_dismissals': []
+                        }
+                    else:
+                        # County already exists just update the delay info
+                        rss_data[county_name]['delay_duration'] = delay_duration
+                        rss_data[county_name]['reason'] = reason
+                        rss_data[county_name]['full_description'] = description
                     
                     print(f"RSS: {county_name} - {delay_duration if delay_duration else 'No delay info'}")
 
