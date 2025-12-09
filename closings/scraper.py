@@ -139,19 +139,6 @@ def scrape_wveis():
                 }
             )
 
-        # Reset all counties to "None" status before updating
-        print("Resetting all counties to default status...")
-        County.objects.all().update(
-            closings='None',
-            delays='None',
-            dismissals='None',
-            non_traditional='None',
-            bus_info='None',
-            delay_duration='',
-            specific_school_closings='',
-            specific_school_dismissals = '',
-        )
-        
         # Then scrape the main page
         headers = {
             'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36'
@@ -164,7 +151,20 @@ def scrape_wveis():
         table = soup.find('table', class_='closings-table')
         
         if not table:
-            return (0, "Could not find the closings table on the page")
+            # WVEIS reset their site for the day - clear data
+            print("Table not found - resetting all counties to default status (end of day)")
+            County.objects.all().update(
+                closings='None',
+                delays='None',
+                dismissals='None',
+                non_traditional='None',
+                bus_info='None',
+                delay_duration='',
+                specific_school_closings='',
+                specific_school_dismissals='',
+                last_update='',
+            )
+            return (0, "Table not found - all counties reset to default status")
         
         rows = table.find_all('tr')[1:]  # Skip header
         updated_count = 0
