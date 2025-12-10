@@ -12,7 +12,6 @@ class County(models.Model):
     delays = models.CharField(max_length=100, default=None)
     dismissals = models.CharField(max_length=100, default=None)
     non_traditional = models.CharField(max_length=100, default=None)
-    bus_info = models.CharField(max_length=100, default=None)
     delay_duration = models.CharField(max_length=100, blank=True, default="")
     specific_school_closings = models.TextField(blank=True, default='')
     specific_school_dismissals = models.TextField(blank=True, default ='')

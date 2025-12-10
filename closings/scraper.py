@@ -131,7 +131,6 @@ def scrape_wveis():
                     'delays': 'None',
                     'dismissals': 'None',
                     'non_traditional': 'None',
-                    'bus_info': 'None',
                     'delay_duration': '',
                     'last_update': '',
                     'specific_school_closings': '',
@@ -158,7 +157,6 @@ def scrape_wveis():
                 delays='None',
                 dismissals='None',
                 non_traditional='None',
-                bus_info='None',
                 delay_duration='',
                 specific_school_closings='',
                 specific_school_dismissals='',
@@ -184,7 +182,6 @@ def scrape_wveis():
             delays = cells[2].get_text(strip=True)
             dismissals = cells[3].get_text(strip=True)
             non_traditional = cells[4].get_text(strip=True)
-            bus_info = cells[5].get_text(strip=True)
             last_update = cells[6].get_text(strip=True)
             
             if not county_name:
@@ -216,7 +213,6 @@ def scrape_wveis():
                     'delays': delays,
                     'dismissals': dismissals,
                     'non_traditional': non_traditional,
-                    'bus_info': bus_info,
                     'last_update': last_update,
                     'delay_duration': delay_duration,
                     'specific_school_closings': school_closings_json,

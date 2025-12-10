@@ -36,7 +36,6 @@ def map_view(request):
             'delay_duration': county.delay_duration,
             'dismissals': county.dismissals,
             'non_traditional': county.non_traditional,
-            'bus_info': county.bus_info,
             'last_update': county.last_update,
             'school_closings': school_closings,
             'school_dismissals': school_dismissals,
