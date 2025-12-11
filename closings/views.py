@@ -27,6 +27,13 @@ def map_view(request):
             except json.JSONDecodeError:
                 school_dismissals = []
         
+        school_delays = []
+        if county.specific_school_delays:
+            try:
+                school_delays = json.loads(county.specific_school_delays)
+            except json.JSONDecodeError:
+                school_delays = []
+        
         counties_data[county.name] = {
             'name': county.name,
             'status': county.get_status(),
@@ -39,6 +46,7 @@ def map_view(request):
             'last_update': county.last_update,
             'school_closings': school_closings,
             'school_dismissals': school_dismissals,
+            'school_delays': school_delays,
         }
     
     # Read SVG file

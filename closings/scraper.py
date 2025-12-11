@@ -47,7 +47,7 @@ def parse_rss_feed():
                             'reason': reason,
                             'full_description': description,
                             'school_closings': [],
-                            'school_dismissals': []
+                            'school_dismissals': [],
                         }
                     else:
                         # County already exists just update the delay info
@@ -70,13 +70,15 @@ def parse_rss_feed():
                             'reason': '',
                             'full_description': '',
                             'school_closings': [],
-                            'school_dismissals': []
+                            'school_dismissals': [],
                         }
 
                     if 'school_closings' not in rss_data[county_name]:
                         rss_data[county_name]['school_closings'] = []
                     if 'school_dismissals' not in rss_data[county_name]:
-                        rss_data[county_name]['school_closings'] = []
+                        rss_data[county_name]['school_dismissals'] = []
+                    if 'school_delays' not in rss_data[county_name]:
+                        rss_data[county_name]['school_delays'] = []
 
                     if 'closing at' in description.lower() or 'will be closing' in description.lower():
                         rss_data[county_name]['school_dismissals'].append({
@@ -84,6 +86,12 @@ def parse_rss_feed():
                             'description': description.strip()
                         })
                         print(f"RSS: Individual dismissal - {school_name} in {county_name}")
+                    elif 'delay' in description.lower():
+                        rss_data[county_name]['school_delays'].append({
+                            'name': school_name,
+                            'description': description.strip()
+                        })
+                        print(f"RSS: Individual delay - {school_name} in {county_name}")
                     else:
                         rss_data[county_name]['school_closings'].append({
                             'name': school_name,
@@ -135,6 +143,7 @@ def scrape_wveis():
                     'last_update': '',
                     'specific_school_closings': '',
                     'specific_school_dismissals': '',
+                    'specific_school_delays': '',
                 }
             )
 
@@ -160,6 +169,7 @@ def scrape_wveis():
                 delay_duration='',
                 specific_school_closings='',
                 specific_school_dismissals='',
+                specific_school_delays = '',
                 last_update='',
             )
             return (0, "Table not found - all counties reset to default status")
@@ -191,6 +201,7 @@ def scrape_wveis():
             delay_duration = ""
             school_closings_json = ""
             school_dismissals_json = ""
+            school_delays_json = ""
 
             if county_name in rss_data:
                 try:
@@ -202,6 +213,9 @@ def scrape_wveis():
                     
                     if rss_data[county_name].get("school_dismissals"):
                         school_dismissals_json = json.dumps(rss_data[county_name]['school_dismissals'])
+
+                    if rss_data[county_name].get("school_delays"):
+                        school_delays_json = json.dumps(rss_data[county_name]['school_delays'])
                 except (KeyError, TypeError) as e:
                     print(f"Warning: Error processing RSS data for {county_name}: {e}")
 
@@ -216,7 +230,8 @@ def scrape_wveis():
                     'last_update': last_update,
                     'delay_duration': delay_duration,
                     'specific_school_closings': school_closings_json,
-                    'specific_school_dismissals': school_dismissals_json
+                    'specific_school_dismissals': school_dismissals_json,
+                    'specific_school_delays': school_delays_json,
                 }
             )
             
@@ -224,7 +239,8 @@ def scrape_wveis():
             duration_info = f" ({delay_duration})" if delay_duration else ""
             school_info = f" - {len(json.loads(school_closings_json)) if school_closings_json else 0} individual schools" if school_closings_json else ""
             dismissal_info = f" - {len(json.loads(school_dismissals_json)) if school_dismissals_json else 0} dismissals" if school_dismissals_json else ""
-            print(f"{action}: {county_name} - {county.get_status()}{duration_info}{school_info}{dismissal_info}")
+            delay_info = f" - {len(json.loads(school_delays_json)) if school_delays_json else 0} delays" if school_delays_json else ""
+            print(f"{action}: {county_name} - {county.get_status()}{duration_info}{school_info}{dismissal_info}{delay_info}")
             updated_count += 1
         
         return (updated_count, None)

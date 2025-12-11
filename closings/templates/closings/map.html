@@ -173,30 +173,28 @@
             font-weight: 600;
         }
 
-        .school-closings-section {
+        .school-section {
             margin-top: 20px;
             padding-top: 20px;
-            border-top: 2px solid rgba(255, 255, 255, 0.1);
+            border-top: 3px solid rgb(50, 55, 74);
+        }
+
+        .school-section-title {
+            font-size: 1.3rem;
+            font-weight: bold;
+            margin-bottom: 15px;
         }
 
         .school-closings-title {
-            font-size: 1.3rem;
-            font-weight: bold;
-            margin-bottom: 15px;
             color: #f97316;
         }
 
-        .school-dismissals-section {
-            margin-top: 20px;
-            padding-top: 20px;
-            border-top: 2px solid rgba(255, 255, 255, 0.1);
+        .school-dismissals-title {
+            color: #0fcf8f;
         }
 
-        .school-dismissals-title {
-            font-size: 1.3rem;
-            font-weight: bold;
-            margin-bottom: 15px;
-            color: #0fcf8f;
+        .school-delays-title {
+            color: #fbbf24;
         }
 
         .school-item {
@@ -213,6 +211,11 @@
         .school-closing-item {
             background: rgba(249, 115, 22, 0.1);
             border-left: 3px solid #f97316;
+        }
+
+        .school-delay-item {
+            background: rgba(251, 191, 36, 0.1);
+            border-left: 3px solid #fbbf24;
         }
 
         .school-name {
@@ -366,8 +369,8 @@
 
             if (county.status === 'PARTIAL' && county.school_closings && county.school_closings.length > 0) {
                 htmlContent += `
-                    <div class="school-closings-section">
-                        <h3 class="school-closings-title">Individual School Closings</h3>
+                    <div class="school-section">
+                        <h3 class="school-section-title school-closings-title">Individual School Closings</h3>
                 `;
 
                 county.school_closings.forEach(school => {
@@ -384,8 +387,8 @@
 
             if (county.status === 'PARTIAL-DISMISSAL' && county.school_dismissals && county.school_dismissals.length > 0) {
                 htmlContent += `
-                    <div class="school-dismissals-section">
-                        <h3 class="school-dismissals-title">Individual School Dismissals</h3>
+                    <div class="school-section">
+                        <h3 class="school-section-title school-dismissals-title">Individual School Dismissals</h3>
                 `;
                 county.school_dismissals.forEach(school => {
                     htmlContent += `
@@ -396,6 +399,23 @@
                     `;
                 });
                 htmlContent += `</div>`;
+            }
+
+            if (county.delays === 'Some' && county.school_delays && county.school_delays.length > 0){
+                htmlContent += `
+                    <div class="school-section">
+                        <h3 class="school-section-title school-delays-title">Individual School Delays</h3>
+                `;
+                county.school_delays.forEach(school => {
+                    htmlContent += `
+                        <div class="school-item school-delay-item">
+                            <div class="school-name">${school.name}</div>
+                            <div class="school-description">${school.description}</div>
+                        </div>
+                    `;
+                });
+                htmlContent += `</div>`;
+                
             }
 
             body.innerHTML = htmlContent;

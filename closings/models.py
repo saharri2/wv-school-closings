@@ -15,6 +15,7 @@ class County(models.Model):
     delay_duration = models.CharField(max_length=100, blank=True, default="")
     specific_school_closings = models.TextField(blank=True, default='')
     specific_school_dismissals = models.TextField(blank=True, default ='')
+    specific_school_delays = models.TextField(blank=True, default='')
 
     # Last update of the data
     last_update = models.CharField(max_length=100, blank=True)
