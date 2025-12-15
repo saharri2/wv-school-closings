@@ -158,24 +158,9 @@ def scrape_wveis():
         soup = BeautifulSoup(response.content, 'html.parser')
         table = soup.find('table', class_='closings-table')
         
-        if not table:
-            # WVEIS reset their site for the day - clear data
-            print("Table not found - resetting all counties to default status (end of day)")
-            County.objects.all().update(
-                closings='None',
-                delays='None',
-                dismissals='None',
-                non_traditional='None',
-                delay_duration='',
-                specific_school_closings='',
-                specific_school_dismissals='',
-                specific_school_delays = '',
-                last_update='',
-            )
-            return (0, "Table not found - all counties reset to default status")
-        
         rows = table.find_all('tr')[1:]  # Skip header
         updated_count = 0
+        updated_counties = set()
         
         for row in rows:
             cells = row.find_all('td')
@@ -234,6 +219,8 @@ def scrape_wveis():
                     'specific_school_delays': school_delays_json,
                 }
             )
+
+            updated_counties.add(county_name)
             
             action = "Created" if created else "Updated"
             duration_info = f" ({delay_duration})" if delay_duration else ""
@@ -243,6 +230,20 @@ def scrape_wveis():
             print(f"{action}: {county_name} - {county.get_status()}{duration_info}{school_info}{dismissal_info}{delay_info}")
             updated_count += 1
         
+        counties_to_reset = set(all_counties) - updated_counties
+        if counties_to_reset:
+            print(f"Resetting {len(counties_to_reset)} counties not on WVEIS today: {', '.join(sorted(counties_to_reset))}")
+            County.objects.filter(name__in=counties_to_reset).update(
+                closings='None',
+                delays='None',
+                dismissals='None',
+                non_traditional='None',
+                delay_duration='',
+                specific_school_closings='',
+                specific_school_dismissals='',
+                specific_school_delays='',
+                last_update=''
+            )
         return (updated_count, None)
     
     except requests.RequestException as e:
