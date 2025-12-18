@@ -158,6 +158,22 @@ def scrape_wveis():
         soup = BeautifulSoup(response.content, 'html.parser')
         table = soup.find('table', class_='closings-table')
         
+        if not table:
+            # WVEIS cleared/removed their table - reset everything
+            print("Table not found - resetting all counties to default status (end of day)")
+            County.objects.all().update(
+                closings='None',
+                delays='None',
+                dismissals='None',
+                non_traditional='None',
+                delay_duration='',
+                specific_school_closings='',
+                specific_school_dismissals='',
+                specific_school_delays='',
+                last_update='',
+            )
+            return (0, "Table not found - all counties reset to default status")
+
         rows = table.find_all('tr')[1:]  # Skip header
         updated_count = 0
         updated_counties = set()
